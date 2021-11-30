@@ -257,18 +257,18 @@ public class RequestsTest extends OpenSearchRestHighLevelClientTestCase {
 //
 //        highLevelClient().indices().create(c -> c
 //                .index(index)
-//                .mappings(m -> m
-//                        .properties(Collections.singletonMap("id", text))
-//                        .properties("name", p -> p
-//                                .object(o -> o
-//                                        .properties(Collections.singletonMap("first", text))
-//                                        .properties(Collections.singletonMap("last", text))
-//                                )
+//                .mappings(m -> m.properties(ps -> ps
+//                        .put("id", text)
+//                        .put("name", p -> p
+//                                .object(o -> o.properties(fs -> fs
+//                                        .put("first", text)
+//                                        .put("last", text)
+//                                ))
 //                        )
-//                )
+//                ))
 //        );
 //
-//        GetMappingResponse mr = highLevelClient().indices().getMapping(new GetMappingRequest.Builder().index(index).build());
+//        GetMappingResponse mr = highLevelClient().indices().getMapping(mrb -> mrb.index(index));
 //
 //        assertNotNull(mr.result().get(index));
 //        assertNotNull(mr.result().get(index).mappings().properties().get("name").object());

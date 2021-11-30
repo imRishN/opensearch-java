@@ -49,23 +49,23 @@ public class TypedKeysTest extends ModelTestCase {
     public void testMapProperty() {
 
         SearchResponse<Void> resp = new SearchResponse.Builder<Void>()
-            .aggregations(_1 -> _1
-                .entry("foo", _2 -> _2.avg(_3 -> _3
-                    .value(3.14)
-                ))
-            )
-            // Required properties on a SearchResponse
-            .took(1)
-            .shards(_1 -> _1.successful(1).failed(0).total(1))
-            .hits(_1 -> _1
-                .total(_2 -> _2.value(0).relation(TotalHitsRelation.Eq))
-                .hits(Collections.emptyList())
-            )
-            .timedOut(false)
-            .build();
+                .aggregations(_1 -> _1
+                        .put("foo", _2 -> _2
+                                .avg(_3 -> _3.value(3.14))
+                        )
+                )
+                // Required properties on a SearchResponse
+                .took(1)
+                .shards(_1 -> _1.successful(1).failed(0).total(1))
+                .hits(_1 -> _1
+                        .total(_2 -> _2.value(0).relation(TotalHitsRelation.Eq))
+                        .hits(Collections.emptyList())
+                )
+                .timedOut(false)
+                .build();
 
         String json = "{\"took\":1,\"timed_out\":false,\"_shards\":{\"failed\":0.0,\"successful\":1.0,\"total\":1.0}," +
-            "\"hits\":{\"total\":{\"relation\":\"eq\",\"value\":0},\"hits\":[]},\"aggregations\":{\"avg#foo\":{\"value\":3.14}}}";
+                "\"hits\":{\"total\":{\"relation\":\"eq\",\"value\":0},\"hits\":[]},\"aggregations\":{\"avg#foo\":{\"value\":3.14}}}";
 
         assertEquals(json, toJson(resp));
 
@@ -99,18 +99,18 @@ public class TypedKeysTest extends ModelTestCase {
             ._toAggregate();
 
         SearchResponse<Void> resp = new SearchResponse.Builder<Void>()
-            .aggregations(_1 -> _1
-                .entry("foo", aggregate)
-            )
-            // Required properties on a SearchResponse
-            .took(1)
-            .shards(_1 -> _1.successful(1).failed(0).total(1))
-            .hits(_1 -> _1
-                .total(_2 -> _2.value(0).relation(TotalHitsRelation.Eq))
-                .hits(Collections.emptyList())
-            )
-            .timedOut(false)
-            .build();
+                .aggregations(_1 -> _1
+                        .put("foo", aggregate)
+                )
+                // Required properties on a SearchResponse
+                .took(1)
+                .shards(_1 -> _1.successful(1).failed(0).total(1))
+                .hits(_1 -> _1
+                        .total(_2 -> _2.value(0).relation(TotalHitsRelation.Eq))
+                        .hits(Collections.emptyList())
+                )
+                .timedOut(false)
+                .build();
 
 
         String json = "{\"took\":1,\"timed_out\":false,\"_shards\":{\"failed\":0.0,\"successful\":1.0,\"total\":1.0}," +

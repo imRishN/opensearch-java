@@ -45,17 +45,17 @@ public class RequestEncodingTest extends ModelTestCase {
         // and variant containers ser/deser
 
         SearchRequest request = new SearchRequest.Builder()
-            .q("blah")
-            .query(b1 -> b1
-                .type(b2 -> b2
-                    .value("foo"))
-            )
-            .aggregations(b1 -> b1
-                .entry("myagg", b2 -> b2
-                    .avg(b3 -> b3.field("foo"))
+                .q("blah")
+                .query(b1 -> b1
+                        .type(b2 -> b2
+                                .value("foo"))
                 )
-            )
-            .build();
+                .aggregations(b1 -> b1
+                        .put("myagg", b2 -> b2
+                                .avg(b3 -> b3.field("foo"))
+                        )
+                )
+                .build();
 
         JsonbJsonpMapper mapper = new JsonbJsonpMapper();
         String str = toJson(request, mapper);

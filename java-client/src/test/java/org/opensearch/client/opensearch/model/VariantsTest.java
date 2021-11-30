@@ -84,20 +84,20 @@ public class VariantsTest extends ModelTestCase {
     @Test
     public void testInternalTag() {
         String expected = "{\"type\":\"ip\",\"fields\":{\"a-field\":{\"type\":\"float\",\"coerce\":true}},\"boost\":1" +
-            ".0,\"index\":true}";
+                ".0,\"index\":true}";
 
         Property p = Property.of(_0 -> _0
-            .ip(_1 -> _1
-                .index(true)
-                .boost(1.0)
-                .fields(_2 -> _2
-                    .entry("a-field", _3 -> _3
-                        .float_(_4 -> _4
-                            .coerce(true)
+                .ip(_1 -> _1
+                        .index(true)
+                        .boost(1.0)
+                        .fields(_2 -> _2
+                                .put("a-field", _3 -> _3
+                                        .float_(_4 -> _4
+                                                .coerce(true)
+                                        )
+                                )
                         )
-                    )
                 )
-            )
         );
 
         assertEquals(expected, toJson(p));
