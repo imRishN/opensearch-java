@@ -36,9 +36,11 @@ import jakarta.json.Json;
 import jakarta.json.JsonValue;
 import org.opensearch.client.json.JsonpMapper;
 import org.opensearch.client.json.jsonb.JsonbJsonpMapper;
+import org.opensearch.client.opensearch._types.OpensearchException;
 import org.opensearch.client.opensearch._types.aggregations.HistogramAggregate;
 import org.opensearch.client.opensearch.cat.NodesResponse;
 import org.opensearch.client.opensearch.core.BulkResponse;
+import org.opensearch.client.opensearch.core.GetResponse;
 import org.opensearch.client.opensearch.core.IndexResponse;
 import org.opensearch.client.opensearch.core.SearchResponse;
 import org.opensearch.client.opensearch.core.bulk.OperationType;
@@ -50,6 +52,7 @@ import org.opensearch.client.transport.BooleanResponse;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class RequestsTest extends OpenSearchRestHighLevelClientTestCase {
 
@@ -147,26 +150,29 @@ public class RequestsTest extends OpenSearchRestHighLevelClientTestCase {
 
         BulkResponse bulk = highLevelClient().bulk(_0 -> _0
                 .operations(_1 -> _1
-                        .create(_2 -> _2
-                                .index("foo")
-                                .id("abc")
-                                .document(appData)
-                        ))
-//                .operations(_1 -> _1
-//                        .create(_2 -> _2
-//                                .index("foo")
-//                                .id("def")
-//                                .document(appData)
-//                        ))
+                        .add(_2 -> _2
+                                .create(_3 -> _3
+                                        .index("foo")
+                                        .id("abc")
+                                        .document(appData)
+                                )
+                        ).add(_2 -> _2
+                                .create(_3 -> _3
+                                        .index("foo")
+                                        .id("def")
+                                        .document(appData)
+                                )
+                        )
+                )
         );
 
         assertFalse(bulk.errors());
-        assertEquals(1, bulk.items().size());
+        assertEquals(2, bulk.items().size());
         assertEquals(OperationType.Create, bulk.items().get(0).operationType());
         assertEquals("foo", bulk.items().get(0).index());
         assertEquals(1L, bulk.items().get(0).version().longValue());
-//        assertEquals("foo", bulk.items().get(1).index());
-//        assertEquals(1L, bulk.items().get(1).version().longValue());
+        assertEquals("foo", bulk.items().get(1).index());
+        assertEquals(1L, bulk.items().get(1).version().longValue());
     }
 
 
@@ -184,31 +190,31 @@ public class RequestsTest extends OpenSearchRestHighLevelClientTestCase {
         assertEquals("1", ir.id());
     }
 
-//    public void testErrorResponse() throws Exception {
-//        BooleanResponse exists = highLevelClient().exists(_0 -> _0.index("doesnotexist").id("reallynot"));
-//        assertFalse(exists.value());
-//
-//        OpensearchException ex = assertThrows(OpensearchException.class, () -> {
-//            GetResponse<String> response = highLevelClient().get(
-//                    _0 -> _0.index("doesnotexist").id("reallynot"), String.class
-//            );
-//        });
-//
-//        assertEquals(404, ex.status());
-//        assertEquals("index_not_found_exception", ex.error().type());
-//        assertEquals("doesnotexist", ex.error().metadata().get("index").to(String.class));
-//
-//        ExecutionException ee = assertThrows(ExecutionException.class, () -> {
-//
-//            GetResponse<String> response = highLevelClient().get(
-//                    _0 -> _0.index("doesnotexist").id("reallynot"), String.class
-//            );
-//        });
-//
-//        ex = ((OpensearchException) ee.getCause());
-//        assertEquals(404, ex.status());
-//        assertEquals("index_not_found_exception", ex.error().type());
-//    }
+    public void testErrorResponse() throws Exception {
+        BooleanResponse exists = highLevelClient().exists(_0 -> _0.index("doesnotexist").id("reallynot"));
+        assertFalse(exists.value());
+
+        OpensearchException ex = assertThrows(OpensearchException.class, () -> {
+            GetResponse<String> response = highLevelClient().get(
+                    _0 -> _0.index("doesnotexist").id("reallynot"), String.class
+            );
+        });
+
+        assertEquals(404, ex.status());
+        assertEquals("index_not_found_exception", ex.error().type());
+        assertEquals("doesnotexist", ex.error().metadata().get("index").to(String.class));
+
+        ExecutionException ee = assertThrows(ExecutionException.class, () -> {
+
+            GetResponse<String> response = highLevelAsyncClient().get(
+                    _0 -> _0.index("doesnotexist").id("reallynot"), String.class
+            ).get();
+        });
+
+        ex = ((OpensearchException) ee.getCause());
+        assertEquals(404, ex.status());
+        assertEquals("index_not_found_exception", ex.error().type());
+    }
 
     public void testSearchAggregation() throws IOException {
 

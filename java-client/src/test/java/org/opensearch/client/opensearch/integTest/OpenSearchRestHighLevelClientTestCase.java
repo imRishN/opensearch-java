@@ -22,6 +22,7 @@ import org.opensearch.client.Response;
 import org.opensearch.client.RestClient;
 import org.opensearch.client.RestClientBuilder;
 import org.opensearch.client.json.jackson.JacksonJsonpMapper;
+import org.opensearch.client.opensearch.OpenSearchAsyncClient;
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -46,6 +47,7 @@ public abstract class OpenSearchRestHighLevelClientTestCase extends OpenSearchRe
 
     private static RestClient restClient;
     private static OpenSearchClient restHighLevelClient;
+    private static OpenSearchAsyncClient restHighLevelAsyncClient;
 
     @Before
     public void initHighLevelClient() throws IOException {
@@ -57,6 +59,7 @@ public abstract class OpenSearchRestHighLevelClientTestCase extends OpenSearchRe
             Transport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
             // Create API client
             restHighLevelClient = new OpenSearchClient(transport);
+            restHighLevelAsyncClient = new OpenSearchAsyncClient(transport);
         }
     }
 
@@ -73,6 +76,10 @@ public abstract class OpenSearchRestHighLevelClientTestCase extends OpenSearchRe
 
     protected static OpenSearchClient highLevelClient() {
         return restHighLevelClient;
+    }
+
+    protected static OpenSearchAsyncClient highLevelAsyncClient(){
+        return restHighLevelAsyncClient;
     }
 
     @Override

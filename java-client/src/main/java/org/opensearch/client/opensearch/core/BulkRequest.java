@@ -44,6 +44,7 @@ import org.opensearch.client.json.JsonpUtils;
 import org.opensearch.client.json.NdJsonpSerializable;
 import org.opensearch.client.transport.Endpoint;
 import org.opensearch.client.transport.SimpleEndpoint;
+import org.opensearch.client.util.ListBuilder;
 import org.opensearch.client.util.ModelTypeHelper;
 import org.opensearch.client.util.ObjectBuilder;
 import org.opensearch.client.util.ObjectBuilderBase;
@@ -472,13 +473,9 @@ public class BulkRequest extends RequestBase implements NdJsonpSerializable, Jso
 		 * <p>
 		 * API name: {@code _value_body}
 		 */
-		@SafeVarargs
-		public final Builder operations(Function<Operation.Builder, ObjectBuilder<Operation>>... fns) {
-			this.operations = new ArrayList<>(fns.length);
-			for (Function<Operation.Builder, ObjectBuilder<Operation>> fn : fns) {
-				this.operations.add(fn.apply(new Operation.Builder()).build());
-			}
-			return this;
+		public final Builder operations(
+				Function<ListBuilder<Operation, Operation.Builder>, ObjectBuilder<List<Operation>>> fn) {
+			return operations(fn.apply(new ListBuilder<>(Operation.Builder::new)).build());
 		}
 
 		/**
