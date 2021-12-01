@@ -9,49 +9,61 @@
 package org.opensearch.client.opensearch.integTest;
 
 import jakarta.json.JsonValue;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.opensearch.client.opensearch._types.Result;
+import org.opensearch.client.opensearch.core.BulkRequest;
+import org.opensearch.client.opensearch.core.BulkResponse;
+import org.opensearch.client.opensearch.core.GetResponse;
+import org.opensearch.client.opensearch.core.IndexResponse;
+import org.opensearch.client.opensearch.core.bulk.Operation;
+import org.opensearch.client.opensearch.core.bulk.ResponseItem;
 import org.opensearch.client.opensearch.indices.CreateIndexResponse;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class CrudIT extends OpenSearchRestHighLevelClientTestCase {
 
 //    public void testDelete() throws IOException {
-//        {
-//            // Testing index deletion
-//            String index1 = "my-index";
-//            CreateIndexResponse createIndexResponse = highLevelClient().indices().create(b -> b.index(index1));
-//            assertEquals(index1, createIndexResponse.index());
-//            assertTrue(createIndexResponse.acknowledged());
-//            assertTrue(createIndexResponse.shardsAcknowledged());
-//            DeleteIndexResponse deleteIndexResponse = highLevelClient().indices().delete(b -> b.index(index1));
-//            assertTrue(deleteIndexResponse.acknowledged());
-//        }
+////        {
+////            // Testing index deletion
+////            String index1 = "my-index";
+////            CreateIndexResponse createIndexResponse = highLevelClient().indices().create(b -> b.index(index1));
+////            assertEquals(index1, createIndexResponse.index());
+////            assertTrue(createIndexResponse.acknowledged());
+////            assertTrue(createIndexResponse.shardsAcknowledged());
+////            DeleteIndexResponse deleteIndexResponse = highLevelClient().indices().delete(b -> b.index(index1));
+////            assertTrue(deleteIndexResponse.acknowledged());
+////        }
 //
 //        {
 //            // Testing doc deletion after data ingestion
 //            String docId = "id";
-//            String index = "my-index";
+//            String index = "my-index1";
 //            highLevelClient().indices().create(b -> b.index(index));
 //
-//            String id = highLevelClient().index(b -> b
-//                    .index(index)
-//                    .id(docId)
-//                    .document(Collections.singletonMap("foo", "bar")))
-//                    .id();
+////            String id = highLevelClient().index(b -> b
+////                    .index(index)
+////                    .id(docId)
+////                    .document(Collections.singletonMap("foo", "bar")))
+////                    .id();
+////
+////            assertEquals(id, docId);
 //
-//            assertEquals(id, docId);
-//
-//            DeleteResponse deleteResponse = highLevelClient().delete(d -> d.id(docId).index(index));
-//            assertEquals(deleteResponse.index(), index);
-//            assertEquals(deleteResponse.id(), docId);
-//            assertEquals(deleteResponse.type(), "_doc");
-//            assertEquals(deleteResponse.result().jsonValue(), Result.Deleted.jsonValue());
+////            DeleteResponse deleteResponse = highLevelClient().delete(d -> d.id(docId).index(index));
+////            assertEquals(deleteResponse.index(), index);
+////            assertEquals(deleteResponse.id(), docId);
+////            assertEquals(deleteResponse.type(), "_doc");
+////            assertEquals(deleteResponse.result().jsonValue(), Result.Deleted.jsonValue());
 //
 //            //TODO Expected - OpensearchException
 //            String docIdTemp = "does_not_exist";
-//            ResponseException ex = assertThrows(ResponseException.class, () -> {
-//                highLevelClient().delete(d -> d.id(docIdTemp).index(index));
+//            OpensearchException ex = assertThrows(OpensearchException.class, () -> {
+//                DeleteResponse delResponse = highLevelClient().delete(d -> d.index(index).id(docIdTemp));
 //            });
 //
 //            assertNotNull(ex);
@@ -942,477 +954,192 @@ public class CrudIT extends OpenSearchRestHighLevelClientTestCase {
 //        assertEquals(indexResponse.getVersion() + 1, updateResponse.getVersion());
 //    }
 //
-//    public void testBulk() throws IOException {
-//        int nbItems = randomIntBetween(10, 100);
-//        boolean[] errors = new boolean[nbItems];
-//
-//        XContentType xContentType = randomFrom(XContentType.JSON, XContentType.SMILE);
-//
-//        BulkRequest bulkRequest = new BulkRequest();
-//        for (int i = 0; i < nbItems; i++) {
-//            String id = String.valueOf(i);
-//            boolean erroneous = randomBoolean();
-//            errors[i] = erroneous;
-//
-//            DocWriteRequest.OpType opType = randomFrom(DocWriteRequest.OpType.values());
-//            if (opType == DocWriteRequest.OpType.DELETE) {
-//                if (erroneous == false) {
-//                    assertEquals(
-//                            RestStatus.CREATED,
-//                            highLevelClient().index(new IndexRequest("index").id(id).source("field", -1), RequestOptions.DEFAULT).status()
-//                    );
-//                }
-//                DeleteRequest deleteRequest = new DeleteRequest("index", id);
-//                bulkRequest.add(deleteRequest);
-//
-//            } else {
-//                BytesReference source = BytesReference.bytes(
-//                        XContentBuilder.builder(xContentType.xContent()).startObject().field("id", i).endObject()
-//                );
-//                if (opType == DocWriteRequest.OpType.INDEX) {
-//                    IndexRequest indexRequest = new IndexRequest("index").id(id).source(source, xContentType);
-//                    if (erroneous) {
-//                        indexRequest.setIfSeqNo(12L);
-//                        indexRequest.setIfPrimaryTerm(12L);
-//                    }
-//                    bulkRequest.add(indexRequest);
-//
-//                } else if (opType == DocWriteRequest.OpType.CREATE) {
-//                    IndexRequest createRequest = new IndexRequest("index").id(id).source(source, xContentType).create(true);
-//                    if (erroneous) {
-//                        assertEquals(RestStatus.CREATED, highLevelClient().index(createRequest, RequestOptions.DEFAULT).status());
-//                    }
-//                    bulkRequest.add(createRequest);
-//
-//                } else if (opType == DocWriteRequest.OpType.UPDATE) {
-//                    UpdateRequest updateRequest = new UpdateRequest("index", id)
-//                    .doc(new IndexRequest().source(source, xContentType));
-//                    if (erroneous == false) {
-//                        assertEquals(
-//                                RestStatus.CREATED,
-//                                highLevelClient().index(new IndexRequest("index")
-//                                .id(id).source("field", -1), RequestOptions.DEFAULT).status()
-//                        );
-//                    }
-//                    bulkRequest.add(updateRequest);
-//                }
-//            }
-//        }
-//
-//        BulkResponse bulkResponse = execute(bulkRequest, highLevelClient()::bulk, highLevelClient()::bulkAsync, RequestOptions.DEFAULT);
-//        assertEquals(RestStatus.OK, bulkResponse.status());
-//        assertTrue(bulkResponse.getTook().getMillis() > 0);
-//        assertEquals(nbItems, bulkResponse.getItems().length);
-//
-//        validateBulkResponses(nbItems, errors, bulkResponse, bulkRequest);
-//    }
-//
-//    public void testBulkProcessorIntegration() throws IOException {
-//        int nbItems = randomIntBetween(10, 100);
-//        boolean[] errors = new boolean[nbItems];
-//
-//        XContentType xContentType = randomFrom(XContentType.JSON, XContentType.SMILE);
-//
-//        AtomicReference<BulkResponse> responseRef = new AtomicReference<>();
-//        AtomicReference<BulkRequest> requestRef = new AtomicReference<>();
-//        AtomicReference<Throwable> error = new AtomicReference<>();
-//
-//        BulkProcessor.Listener listener = new BulkProcessor.Listener() {
-//            @Override
-//            public void beforeBulk(long executionId, BulkRequest request) {
-//
-//            }
-//
-//            @Override
-//            public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-//                responseRef.set(response);
-//                requestRef.set(request);
-//            }
-//
-//            @Override
-//            public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-//                error.set(failure);
-//            }
-//        };
-//
-//        try (
-//                BulkProcessor processor = BulkProcessor.builder(
-//                        (request, bulkListener) -> highLevelClient().bulkAsync(request, RequestOptions.DEFAULT, bulkListener),
-//                        listener
-//                ).setConcurrentRequests(0).setBulkSize(new ByteSizeValue(5, ByteSizeUnit.GB)).setBulkActions(nbItems + 1).build()
-//        ) {
-//            for (int i = 0; i < nbItems; i++) {
-//                String id = String.valueOf(i);
-//                boolean erroneous = randomBoolean();
-//                errors[i] = erroneous;
-//
-//                DocWriteRequest.OpType opType = randomFrom(DocWriteRequest.OpType.values());
-//                if (opType == DocWriteRequest.OpType.DELETE) {
-//                    if (erroneous == false) {
-//                        assertEquals(
-//                                RestStatus.CREATED,
-//                                highLevelClient().index(new IndexRequest("index")
-//                                .id(id).source("field", -1), RequestOptions.DEFAULT).status()
-//                        );
-//                    }
-//                    DeleteRequest deleteRequest = new DeleteRequest("index", id);
-//                    processor.add(deleteRequest);
-//
-//                } else {
-//                    if (opType == DocWriteRequest.OpType.INDEX) {
-//                        IndexRequest indexRequest = new IndexRequest("index").id(id).source(xContentType, "id", i);
-//                        if (erroneous) {
-//                            indexRequest.setIfSeqNo(12L);
-//                            indexRequest.setIfPrimaryTerm(12L);
-//                        }
-//                        processor.add(indexRequest);
-//
-//                    } else if (opType == DocWriteRequest.OpType.CREATE) {
-//                        IndexRequest createRequest = new IndexRequest("index").id(id).source(xContentType, "id", i).create(true);
-//                        if (erroneous) {
-//                            assertEquals(RestStatus.CREATED, highLevelClient().index(createRequest, RequestOptions.DEFAULT).status());
-//                        }
-//                        processor.add(createRequest);
-//
-//                    } else if (opType == DocWriteRequest.OpType.UPDATE) {
-//                        UpdateRequest updateRequest = new UpdateRequest("index", id)
-//                        .doc(new IndexRequest().source(xContentType, "id", i));
-//                        if (erroneous == false) {
-//                            assertEquals(
-//                                    RestStatus.CREATED,
-//                                    highLevelClient().index(new IndexRequest("index").id(id).source("field", -1), RequestOptions.DEFAULT)
-//                                            .status()
-//                            );
-//                        }
-//                        processor.add(updateRequest);
-//                    }
-//                }
-//            }
-//            assertNull(responseRef.get());
-//            assertNull(requestRef.get());
-//        }
-//
-//        BulkResponse bulkResponse = responseRef.get();
-//        BulkRequest bulkRequest = requestRef.get();
-//
-//        assertEquals(RestStatus.OK, bulkResponse.status());
-//        assertTrue(bulkResponse.getTook().getMillis() > 0);
-//        assertEquals(nbItems, bulkResponse.getItems().length);
-//        assertNull(error.get());
-//
-//        validateBulkResponses(nbItems, errors, bulkResponse, bulkRequest);
-//    }
-//
-//    private void validateBulkResponses(int nbItems, boolean[] errors, BulkResponse bulkResponse, BulkRequest bulkRequest) {
-//        for (int i = 0; i < nbItems; i++) {
-//            BulkItemResponse bulkItemResponse = bulkResponse.getItems()[i];
-//
-//            assertEquals(i, bulkItemResponse.getItemId());
-//            assertEquals("index", bulkItemResponse.getIndex());
-//            assertEquals("_doc", bulkItemResponse.getType());
-//            assertEquals(String.valueOf(i), bulkItemResponse.getId());
-//
-//            DocWriteRequest.OpType requestOpType = bulkRequest.requests().get(i).opType();
-//            if (requestOpType == DocWriteRequest.OpType.INDEX || requestOpType == DocWriteRequest.OpType.CREATE) {
-//                assertEquals(errors[i], bulkItemResponse.isFailed());
-//                assertEquals(errors[i] ? RestStatus.CONFLICT : RestStatus.CREATED, bulkItemResponse.status());
-//            } else if (requestOpType == DocWriteRequest.OpType.UPDATE) {
-//                assertEquals(errors[i], bulkItemResponse.isFailed());
-//                assertEquals(errors[i] ? RestStatus.NOT_FOUND : RestStatus.OK, bulkItemResponse.status());
-//            } else if (requestOpType == DocWriteRequest.OpType.DELETE) {
-//                assertFalse(bulkItemResponse.isFailed());
-//                assertEquals(errors[i] ? RestStatus.NOT_FOUND : RestStatus.OK, bulkItemResponse.status());
-//            }
-//        }
-//    }
-//
-//    public void testUrlEncode() throws IOException {
-//        String indexPattern = "<logstash-{now/M}>";
-//        String expectedIndex = "logstash-"
-//                + DateTimeFormat.forPattern("YYYY.MM.dd").print(new DateTime(DateTimeZone.UTC).monthOfYear().roundFloorCopy());
-//        {
-//            IndexRequest indexRequest = new IndexRequest(indexPattern).id("id#1");
-//            indexRequest.source("field", "value");
-//            IndexResponse indexResponse = highLevelClient().index(indexRequest, RequestOptions.DEFAULT);
-//            assertEquals(expectedIndex, indexResponse.getIndex());
-//            assertEquals("_doc", indexResponse.getType());
-//            assertEquals("id#1", indexResponse.getId());
-//        }
-//        {
-//            GetRequest getRequest = new GetRequest(indexPattern, "id#1");
-//            GetResponse getResponse = highLevelClient().get(getRequest, RequestOptions.DEFAULT);
-//            assertTrue(getResponse.isExists());
-//            assertEquals(expectedIndex, getResponse.getIndex());
-//            assertEquals("_doc", getResponse.getType());
-//            assertEquals("id#1", getResponse.getId());
-//        }
-//
-//        String docId = "this/is/the/id";
-//        {
-//            IndexRequest indexRequest = new IndexRequest("index").id(docId);
-//            indexRequest.source("field", "value");
-//            IndexResponse indexResponse = highLevelClient().index(indexRequest, RequestOptions.DEFAULT);
-//            assertEquals("index", indexResponse.getIndex());
-//            assertEquals("_doc", indexResponse.getType());
-//            assertEquals(docId, indexResponse.getId());
-//        }
-//        {
-//            GetRequest getRequest = new GetRequest("index", docId);
-//            GetResponse getResponse = highLevelClient().get(getRequest, RequestOptions.DEFAULT);
-//            assertTrue(getResponse.isExists());
-//            assertEquals("index", getResponse.getIndex());
-//            assertEquals("_doc", getResponse.getType());
-//            assertEquals(docId, getResponse.getId());
-//        }
-//
-//        assertTrue(highLevelClient().indices().exists(new GetIndexRequest(indexPattern, "index"), RequestOptions.DEFAULT));
-//    }
-//
-//    public void testParamsEncode() throws IOException {
-//        // parameters are encoded by the low-level client but let's test that everything works the same when we use the high-level one
-//        String routing = "";
-//        {
-//            IndexRequest indexRequest = new IndexRequest("index").id("id");
-//            indexRequest.source("field", "value");
-//            indexRequest.routing(routing);
-//            IndexResponse indexResponse = highLevelClient().index(indexRequest, RequestOptions.DEFAULT);
-//            assertEquals("index", indexResponse.getIndex());
-//            assertEquals("_doc", indexResponse.getType());
-//            assertEquals("id", indexResponse.getId());
-//        }
-//        {
-//            GetRequest getRequest = new GetRequest("index", "id").routing(routing);
-//            GetResponse getResponse = highLevelClient().get(getRequest, RequestOptions.DEFAULT);
-//            assertTrue(getResponse.isExists());
-//            assertEquals("index", getResponse.getIndex());
-//            assertEquals("_doc", getResponse.getType());
-//            assertEquals("id", getResponse.getId());
-//            assertEquals(routing, getResponse.getField("_routing").getValue());
-//        }
-//    }
-//
-//    public void testGetIdWithPlusSign() throws Exception {
-//        String id = "id+id";
-//        {
-//            IndexRequest indexRequest = new IndexRequest("index").id(id);
-//            indexRequest.source("field", "value");
-//            IndexResponse indexResponse = highLevelClient().index(indexRequest, RequestOptions.DEFAULT);
-//            assertEquals("index", indexResponse.getIndex());
-//            assertEquals(id, indexResponse.getId());
-//        }
-//        {
-//            GetRequest getRequest = new GetRequest("index").id(id);
-//            GetResponse getResponse = highLevelClient().get(getRequest, RequestOptions.DEFAULT);
-//            assertTrue(getResponse.isExists());
-//            assertEquals("index", getResponse.getIndex());
-//            assertEquals(id, getResponse.getId());
-//        }
-//    }
-//
-//    // Not entirely sure if _termvectors belongs to CRUD, and in the absence of a better place, will have it here
-//    public void testTermvectors() throws IOException {
-//        final String sourceIndex = "index1";
-//        {
-//            // prepare : index docs
-//            Settings settings = Settings.builder().put("number_of_shards", 1).put("number_of_replicas", 0).build();
-//            String mappings = "\"properties\":{\"field\":{\"type\":\"text\"}}";
-//            createIndex(sourceIndex, settings, mappings);
-//            assertEquals(
-//                    RestStatus.OK,
-//                    highLevelClient().bulk(
-//                            new BulkRequest().add(
-//                                    new IndexRequest(sourceIndex).id("1")
-//                                    .source(Collections.singletonMap("field", "value1"), XContentType.JSON)
-//                            )
-//                                    .add(new IndexRequest(sourceIndex).id("2")
-//                                    .source(Collections.singletonMap("field", "value2"), XContentType.JSON))
-//                                    .setRefreshPolicy(RefreshPolicy.IMMEDIATE),
-//                            RequestOptions.DEFAULT
-//                    ).status()
-//            );
-//        }
-//        {
-//            // test _termvectors on real documents
-//            TermVectorsRequest tvRequest = new TermVectorsRequest(sourceIndex, "1");
-//            tvRequest.setFields("field");
-//            TermVectorsResponse tvResponse = execute(tvRequest, highLevelClient()::termvectors, highLevelClient()::termvectorsAsync);
-//
-//            TermVectorsResponse.TermVector.Token expectedToken = new TermVectorsResponse.TermVector.Token(0, 6, 0, null);
-//            TermVectorsResponse.TermVector.Term expectedTerm = new TermVectorsResponse.TermVector.Term(
-//                    "value1",
-//                    1,
-//                    null,
-//                    null,
-//                    null,
-//                    Collections.singletonList(expectedToken)
-//            );
-//            TermVectorsResponse.TermVector.FieldStatistics expectedFieldStats =
-//            new TermVectorsResponse.TermVector.FieldStatistics(2, 2, 2);
-//            TermVectorsResponse.TermVector expectedTV = new TermVectorsResponse.TermVector(
-//                    "field",
-//                    expectedFieldStats,
-//                    Collections.singletonList(expectedTerm)
-//            );
-//            List<TermVectorsResponse.TermVector> expectedTVlist = Collections.singletonList(expectedTV);
-//
-//            assertThat(tvResponse.getIndex(), equalTo(sourceIndex));
-//            assertThat(Integer.valueOf(tvResponse.getId()), equalTo(1));
-//            assertTrue(tvResponse.getFound());
-//            assertEquals(expectedTVlist, tvResponse.getTermVectorsList());
-//        }
-//        {
-//            // test _termvectors on artificial documents
-//            XContentBuilder docBuilder = XContentFactory.jsonBuilder();
-//            docBuilder.startObject().field("field", "valuex").endObject();
-//
-//            TermVectorsRequest tvRequest = new TermVectorsRequest(sourceIndex, docBuilder);
-//            TermVectorsResponse tvResponse = execute(tvRequest, highLevelClient()::termvectors, highLevelClient()::termvectorsAsync);
-//
-//            TermVectorsResponse.TermVector.Token expectedToken = new TermVectorsResponse.TermVector.Token(0, 6, 0, null);
-//            TermVectorsResponse.TermVector.Term expectedTerm = new TermVectorsResponse.TermVector.Term(
-//                    "valuex",
-//                    1,
-//                    null,
-//                    null,
-//                    null,
-//                    Collections.singletonList(expectedToken)
-//            );
-//            TermVectorsResponse.TermVector.FieldStatistics expectedFieldStats =
-//            new TermVectorsResponse.TermVector.FieldStatistics(2, 2, 2);
-//            TermVectorsResponse.TermVector expectedTV = new TermVectorsResponse.TermVector(
-//                    "field",
-//                    expectedFieldStats,
-//                    Collections.singletonList(expectedTerm)
-//            );
-//            List<TermVectorsResponse.TermVector> expectedTVlist = Collections.singletonList(expectedTV);
-//
-//            assertThat(tvResponse.getIndex(), equalTo(sourceIndex));
-//            assertTrue(tvResponse.getFound());
-//            assertEquals(expectedTVlist, tvResponse.getTermVectorsList());
-//        }
-//    }
-//
-//    // Not entirely sure if _termvectors belongs to CRUD, and in the absence of a better place, will have it here
-//    public void testTermvectorsWithNonExistentIndex() {
-//        TermVectorsRequest request = new TermVectorsRequest("non-existent", "non-existent");
-//
-//        OpenSearchException exception = expectThrows(
-//                OpenSearchException.class,
-//                () -> execute(request, highLevelClient()::termvectors, highLevelClient()::termvectorsAsync)
-//        );
-//        assertEquals(RestStatus.NOT_FOUND, exception.status());
-//    }
-//
-//    // Not entirely sure if _mtermvectors belongs to CRUD, and in the absence of a better place, will have it here
-//    public void testMultiTermvectors() throws IOException {
-//        final String sourceIndex = "index1";
-//        {
-//            // prepare : index docs
-//            Settings settings = Settings.builder().put("number_of_shards", 1).put("number_of_replicas", 0).build();
-//            String mappings = "\"properties\":{\"field\":{\"type\":\"text\"}, \"field2\":{\"type\":\"text\"}}";
-//            createIndex(sourceIndex, settings, mappings);
-//            final Map<String, String> doc1 = new HashMap<>();
-//            doc1.put("field", "value1");
-//            doc1.put("field2", "hello world");
-//            final Map<String, String> doc2 = new HashMap<>();
-//            doc2.put("field", "value2");
-//            doc2.put("field2", "foo var");
-//            assertEquals(
-//                    RestStatus.OK,
-//                    highLevelClient().bulk(
-//                            new BulkRequest().add(new IndexRequest(sourceIndex).id("1").source(doc1, XContentType.JSON))
-//                                    .add(new IndexRequest(sourceIndex).id("2").source(doc2, XContentType.JSON))
-//                                    .setRefreshPolicy(RefreshPolicy.IMMEDIATE),
-//                            RequestOptions.DEFAULT
-//                    ).status()
-//            );
-//        }
-//        {
-//            // test _mtermvectors where MultiTermVectorsRequest is constructed with ids and a template
-//            String[] expectedIds = {"1", "2"};
-//            TermVectorsRequest tvRequestTemplate = new TermVectorsRequest(sourceIndex, "fake_id");
-//            tvRequestTemplate.setFields("field");
-//            MultiTermVectorsRequest mtvRequest = new MultiTermVectorsRequest(expectedIds, tvRequestTemplate);
-//
-//            MultiTermVectorsResponse mtvResponse = execute(
-//                    mtvRequest,
-//                    highLevelClient()::mtermvectors,
-//                    highLevelClient()::mtermvectorsAsync
-//            );
-//
-//            List<String> ids = new ArrayList<>();
-//            for (TermVectorsResponse tvResponse : mtvResponse.getTermVectorsResponses()) {
-//                assertThat(tvResponse.getIndex(), equalTo(sourceIndex));
-//                assertTrue(tvResponse.getFound());
-//                ids.add(tvResponse.getId());
-//            }
-//            assertArrayEquals(expectedIds, ids.toArray());
-//        }
-//
-//        {
-//            // test _mtermvectors where MultiTermVectorsRequest constructed with adding each separate request
-//            MultiTermVectorsRequest mtvRequest = new MultiTermVectorsRequest();
-//            TermVectorsRequest tvRequest1 = new TermVectorsRequest(sourceIndex, "1");
-//            tvRequest1.setFields("field");
-//            mtvRequest.add(tvRequest1);
-//
-//            XContentBuilder docBuilder = XContentFactory.jsonBuilder();
-//            docBuilder.startObject().field("field", "valuex").endObject();
-//            TermVectorsRequest tvRequest2 = new TermVectorsRequest(sourceIndex, docBuilder);
-//            mtvRequest.add(tvRequest2);
-//
-//            MultiTermVectorsResponse mtvResponse = execute(
-//                    mtvRequest,
-//                    highLevelClient()::mtermvectors,
-//                    highLevelClient()::mtermvectorsAsync
-//            );
-//            for (TermVectorsResponse tvResponse : mtvResponse.getTermVectorsResponses()) {
-//                assertThat(tvResponse.getIndex(), equalTo(sourceIndex));
-//                assertTrue(tvResponse.getFound());
-//            }
-//        }
-//
-//        {
-//            // test the behavior of fields param
-//            MultiTermVectorsRequest mtvRequest = new MultiTermVectorsRequest();
-//            TermVectorsRequest tvRequest1 = new TermVectorsRequest(sourceIndex, "1");
-//            tvRequest1.setFields("field");
-//            mtvRequest.add(tvRequest1);
-//
-//            TermVectorsRequest tvRequest2 = new TermVectorsRequest(sourceIndex, "2");
-//            tvRequest2.setFields("field2");
-//            mtvRequest.add(tvRequest2);
-//
-//            TermVectorsRequest tvRequest3 = new TermVectorsRequest(sourceIndex, "2");
-//            tvRequest3.setFields("field", "field2");
-//            mtvRequest.add(tvRequest3);
-//
-//            MultiTermVectorsResponse mtvResponse = execute(
-//                    mtvRequest,
-//                    highLevelClient()::mtermvectors,
-//                    highLevelClient()::mtermvectorsAsync
-//            );
-//            final List<String> expectedFields = new ArrayList<>();
-//            expectedFields.add("field");
-//            expectedFields.add("field2");
-//            List<List<String>> expectedRespFields = new ArrayList<>();
-//            expectedRespFields.add(Collections.singletonList("field"));
-//            expectedRespFields.add(Collections.singletonList("field2"));
-//            expectedRespFields.add(expectedFields);
-//            List<TermVectorsResponse> responses = mtvResponse.getTermVectorsResponses();
-//            assertEquals(expectedRespFields.size(), responses.size());
-//            for (int i = 0; i < responses.size(); i++) {
-//                TermVectorsResponse tvResponse = responses.get(i);
-//                assertThat(tvResponse.getIndex(), equalTo(sourceIndex));
-//                assertTrue(tvResponse.getFound());
-//                assertEquals(expectedRespFields.get(i).size(), tvResponse.getTermVectorsList().size());
-//                assertEquals(
-//                        expectedRespFields.get(i),
-//                        tvResponse.getTermVectorsList().stream().map(tv -> tv.getFieldName()).collect(Collectors.toList())
-//                );
-//            }
-//        }
-//    }
+    public void testBulk() throws IOException {
+        AppData appData = new AppData();
+        appData.setIntValue(1337);
+        appData.setMsg("foo");
+        int nbItems = randomIntBetween(10, 100);
+        boolean[] errors = new boolean[nbItems];
+
+        BulkRequest.Builder bulkRequestBuilder = new BulkRequest.Builder();
+        List<Operation> opsList = new ArrayList<>();
+
+        for (int i = 0; i < nbItems; i++) {
+            String id = String.valueOf(i);
+            boolean erroneous = randomBoolean();
+            errors[i] = erroneous;
+
+            String opType = randomFrom(Operation.DELETE, Operation.INDEX,Operation.CREATE/*, Operation.UPDATE*/);
+            if (opType.equals(Operation.DELETE)) {
+                if (!erroneous) {
+                    assertEquals(
+                            Result.Created,
+                            highLevelClient().index(b -> b.index("index").id(id).document(appData)).result()
+                    );
+                }
+                Operation op = new Operation.Builder().delete(o -> o
+                        .index("index")
+                        .id(id)
+                ).build();
+                opsList.add(op);
+
+            } else {
+                appData.setIntValue(i);
+                appData.setMsg("id");
+                if (opType.equals(Operation.INDEX)) {
+                    Operation op = new Operation.Builder().index(o -> o
+                            .index("index")
+                            .id(id)
+                            .document(appData)
+                            .ifSeqNo(erroneous ? 12L : null)
+                            .ifPrimaryTerm(erroneous ? 12L : null)
+                    ).build();
+                    opsList.add(op);
+
+                } else if (opType.equals(Operation.CREATE)) {
+                    Operation op = new Operation.Builder().create(o -> o
+                            .index("index")
+                            .id(id)
+                            .document(appData)
+
+                    ).build();
+                    opsList.add(op);
+
+                    if (erroneous) {
+                        assertEquals(Result.Created, highLevelClient().index(b -> b.index("index").id(id).document(appData)).result());
+                    }
+
+                } else if (opType.equals(Operation.UPDATE)) {
+                    Operation op = new Operation.Builder().update(o -> o
+                            .index("index")
+                            .id(id)
+                            .document(Collections.singletonMap("key", "value"))
+                    ).build();
+                    opsList.add(op);
+                    if (!erroneous) {
+                        assertEquals(
+                                Result.Created,
+                                highLevelClient().index(b -> b.index("index").id(id).document(appData)).result()
+                        );
+                    }
+                }
+            }
+        }
+        BulkRequest bulkRequest = bulkRequestBuilder.operations(opsList).build();
+
+        BulkResponse bulkResponse = highLevelClient().bulk(bulkRequest);
+        assertTrue(bulkResponse.took() > 0);
+        assertEquals(nbItems, bulkResponse.items().size());
+
+        validateBulkResponses(nbItems, errors, bulkResponse, bulkRequest);
+    }
+
+    private void validateBulkResponses(int nbItems, boolean[] errors, BulkResponse bulkResponse, BulkRequest bulkRequest) {
+        for (int i = 0; i < nbItems; i++) {
+            ResponseItem bulkItemResponse = bulkResponse.items().get(i);
+
+            assertEquals("index", bulkItemResponse.index());
+            assertEquals("_doc", bulkItemResponse.type());
+            assertEquals(String.valueOf(i), bulkItemResponse.id());
+
+            String requestOpType = bulkRequest.operations().get(i)._type();
+            if (requestOpType.equals(Operation.INDEX) || requestOpType.equals(Operation.CREATE)) {
+                assertEquals(errors[i] ? 409 : 201, bulkItemResponse.status());
+            } else if (requestOpType.equals(Operation.UPDATE)) {
+                assertEquals(errors[i]? Result.NotFound.jsonValue() : Result.Updated.jsonValue(), bulkItemResponse.result());
+                assertEquals(errors[i] ? 404 : 200, bulkItemResponse.status());
+            } else if (requestOpType.equals(Operation.DELETE)) {
+                assertEquals(errors[i]? Result.NotFound.jsonValue() : Result.Deleted.jsonValue(), bulkItemResponse.result());
+                assertEquals(errors[i] ? 404 : 200, bulkItemResponse.status());
+            }
+        }
+    }
+
+    public void testUrlEncode() throws IOException {
+        String indexPattern = "<logstash-{now/M}>";
+        String expectedIndex = "logstash-"
+                + DateTimeFormat.forPattern("YYYY.MM.dd").print(new DateTime(DateTimeZone.UTC).monthOfYear().roundFloorCopy());
+        AppData appData = new AppData();
+        appData.setIntValue(1337);
+        appData.setMsg("foo");
+        {
+            IndexResponse response = highLevelClient().index(b -> b.index(indexPattern).id("id#1").document(appData));
+            assertEquals(expectedIndex, response.index());
+            assertEquals("_doc", response.type());
+            assertEquals("id#1", response.id());
+        }
+        {
+            GetResponse<AppData> getResponse = highLevelClient().get(b -> b
+                    .index(indexPattern).id("id#1"), AppData.class);
+            assertTrue(getResponse.found());
+            assertEquals(expectedIndex, getResponse.index());
+            assertEquals("_doc", getResponse.type());
+            assertEquals("id#1", getResponse.id());
+        }
+
+        String docId = "this/is/the/id";
+        {
+            IndexResponse indexResponse = highLevelClient().index(b -> b.index("index").id(docId).document(appData));
+            assertEquals("index", indexResponse.index());
+            assertEquals("_doc", indexResponse.type());
+            assertEquals(docId, indexResponse.id());
+        }
+        {
+            GetResponse<AppData> getResponse = highLevelClient().get(b -> b
+                    .index("index").id(docId), AppData.class);
+            assertTrue(getResponse.found());
+            assertEquals("index", getResponse.index());
+            assertEquals("_doc", getResponse.type());
+            assertEquals(docId, getResponse.id());
+        }
+
+        assertTrue(highLevelClient().indices().exists(b -> b.index(indexPattern, "index")).value());
+    }
+
+    public void testParamsEncode() throws IOException {
+        String routing = "test";
+        {
+            String id = "id";
+            AppData appData = new AppData();
+            appData.setIntValue(1337);
+            appData.setMsg("foo");
+            IndexResponse response = highLevelClient().index(b -> b.index("index").id(id).document(appData).routing(routing));
+            assertEquals("index", response.index());
+            assertEquals("_doc", response.type());
+            assertEquals(id, response.id());
+        }
+        {
+            GetResponse<AppData> getResponse = highLevelClient().get(b -> b
+                    .index("index").id("id").routing(routing), AppData.class);
+            assertTrue(getResponse.found());
+            assertEquals("index", getResponse.index());
+            assertEquals("_doc", getResponse.type());
+            assertEquals("id", getResponse.id());
+            assertEquals(routing, getResponse.routing());
+        }
+    }
+
+    public void testGetIdWithPlusSign() throws Exception {
+        String id = "id+id";
+        AppData appData = new AppData();
+        appData.setIntValue(1337);
+        appData.setMsg("foo");
+
+        {
+            IndexResponse indexResponse = highLevelClient().index(b -> b
+                    .index("index").id(id).document(appData));
+            assertEquals("index", indexResponse.index());
+            assertEquals(id, indexResponse.id());
+        }
+        {
+            GetResponse<AppData> getResponse = highLevelClient().get(b -> b
+                    .index("index").id(id), AppData.class);
+            assertTrue(getResponse.found());
+            assertEquals("index", getResponse.index());
+            assertEquals(id, getResponse.id());
+        }
+    }
+
     public static class AppData {
         private int intValue;
         private String msg;
