@@ -968,7 +968,7 @@ public class CrudIT extends OpenSearchRestHighLevelClientTestCase {
             String id = String.valueOf(i);
             boolean erroneous = randomBoolean();
             errors[i] = erroneous;
-
+            //TODO - Serialization issue with update operation
             String opType = randomFrom(Operation.DELETE, Operation.INDEX,Operation.CREATE/*, Operation.UPDATE*/);
             if (opType.equals(Operation.DELETE)) {
                 if (!erroneous) {

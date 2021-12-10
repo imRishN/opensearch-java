@@ -8,6 +8,7 @@
 
 package org.opensearch.client.opensearch.integTest;
 
+import org.opensearch.client.ResponseException;
 import org.opensearch.client.json.JsonData;
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.opensearch.client.opensearch._types.Health;
@@ -125,7 +126,6 @@ public class ClusterClientIT extends OpenSearchRestHighLevelClientTestCase {
         openSearchClient.cluster().putSettings(request);
 
         GetSettingsResponse getSettingsResponse = openSearchClient.cluster().getSettings(new GetSettingsRequest.Builder().build());
-        //TODO - compare actual and expected result
         assertEquals(1, getSettingsResponse.persistent().size());
         assertEquals(1, getSettingsResponse.transient_().size());
         assertEquals(0, getSettingsResponse.defaults().size());
@@ -169,7 +169,7 @@ public class ClusterClientIT extends OpenSearchRestHighLevelClientTestCase {
         HealthResponse response = openSearchClient.cluster().health(request);
         assertNotNull(response);
         assertFalse(response.timedOut());
-//        assertEquals(response.status(), Health.Green);
+        assertEquals(response.status(), Health.Green);
     }
 
     public void testClusterHealthYellowClusterLevel() throws IOException {
@@ -178,7 +178,7 @@ public class ClusterClientIT extends OpenSearchRestHighLevelClientTestCase {
         createIndex("index2", Settings.EMPTY);
         HealthRequest request = new HealthRequest.Builder().timeout("5s").build();
         HealthResponse response = openSearchClient.cluster().health(request);
-        assertThat(response.indices().size(), equalTo(0));
+        assertEquals(response.indices().size(), 0);
     }
 
     public void testClusterHealthYellowIndicesLevel() throws IOException {
@@ -263,7 +263,7 @@ public class ClusterClientIT extends OpenSearchRestHighLevelClientTestCase {
             }
         }
     }
-//
+
     private static void assertYellowShard(String shardId, ShardHealthStats shardHealth) {
         assertNotNull(shardHealth);
         assertEquals(shardHealth.status(), Health.Yellow);
@@ -287,7 +287,7 @@ public class ClusterClientIT extends OpenSearchRestHighLevelClientTestCase {
 //    public void testClusterHealthNotFoundIndex() throws IOException {
 //        OpenSearchClient openSearchClient = highLevelClient();
 //        createIndex("index", Settings.EMPTY);
-//        HealthRequest request = new HealthRequest.Builder().index("notexisted-index").timeout("5s").build();
+//        HealthRequest request = new HealthRequest.Builder().index("notexisted-index").timeout("5s").level(Level.Indices).build();
 //        try {
 //            HealthResponse response = openSearchClient.cluster().health(request);
 //            assertNotNull(response);
