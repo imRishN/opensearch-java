@@ -340,7 +340,6 @@ public class FreezeRequest extends RequestBase {
 	 * Endpoint "{@code indices.freeze}".
 	 */
 	public static final Endpoint<FreezeRequest, FreezeResponse, ErrorResponse> _ENDPOINT = new SimpleEndpoint<>(
-			"es/indices.freeze",
 
 			// Request method
 			request -> {

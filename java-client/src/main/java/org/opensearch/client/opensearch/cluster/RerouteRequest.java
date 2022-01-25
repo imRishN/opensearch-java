@@ -402,7 +402,6 @@ public class RerouteRequest extends RequestBase implements JsonpSerializable {
 	 * Endpoint "{@code cluster.reroute}".
 	 */
 	public static final Endpoint<RerouteRequest, RerouteResponse, ErrorResponse> _ENDPOINT = new SimpleEndpoint<>(
-			"es/cluster.reroute",
 
 			// Request method
 			request -> {

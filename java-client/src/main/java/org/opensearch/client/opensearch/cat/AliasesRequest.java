@@ -182,7 +182,6 @@ public class AliasesRequest extends CatRequestBase {
 	 * Endpoint "{@code cat.aliases}".
 	 */
 	public static final Endpoint<AliasesRequest, AliasesResponse, ErrorResponse> _ENDPOINT = new SimpleEndpoint<>(
-			"es/cat.aliases",
 
 			// Request method
 			request -> {

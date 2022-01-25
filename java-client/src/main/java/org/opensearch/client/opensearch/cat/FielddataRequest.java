@@ -167,7 +167,6 @@ public class FielddataRequest extends CatRequestBase {
 	 * Endpoint "{@code cat.fielddata}".
 	 */
 	public static final Endpoint<FielddataRequest, FielddataResponse, ErrorResponse> _ENDPOINT = new SimpleEndpoint<>(
-			"es/cat.fielddata",
 
 			// Request method
 			request -> {

@@ -393,7 +393,6 @@ public class ShrinkRequest extends RequestBase implements JsonpSerializable {
 	 * Endpoint "{@code indices.shrink}".
 	 */
 	public static final Endpoint<ShrinkRequest, ShrinkResponse, ErrorResponse> _ENDPOINT = new SimpleEndpoint<>(
-			"es/indices.shrink",
 
 			// Request method
 			request -> {

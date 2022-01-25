@@ -220,7 +220,6 @@ public class DeleteDanglingIndexRequest extends RequestBase {
 	 * Endpoint "{@code dangling_indices.delete_dangling_index}".
 	 */
 	public static final Endpoint<DeleteDanglingIndexRequest, DeleteDanglingIndexResponse, ErrorResponse> _ENDPOINT = new SimpleEndpoint<>(
-			"es/dangling_indices.delete_dangling_index",
 
 			// Request method
 			request -> {

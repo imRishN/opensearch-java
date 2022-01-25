@@ -435,7 +435,6 @@ public class DeleteRequest extends RequestBase {
 	 * Endpoint "{@code delete}".
 	 */
 	public static final Endpoint<DeleteRequest, DeleteResponse, ErrorResponse> _ENDPOINT = new SimpleEndpoint<>(
-			"es/delete",
 
 			// Request method
 			request -> {

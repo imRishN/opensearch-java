@@ -120,7 +120,6 @@ public class DeleteIndexTemplateRequest extends RequestBase {
 	 * Endpoint "{@code indices.delete_index_template}".
 	 */
 	public static final Endpoint<DeleteIndexTemplateRequest, DeleteIndexTemplateResponse, ErrorResponse> _ENDPOINT = new SimpleEndpoint<>(
-			"es/indices.delete_index_template",
 
 			// Request method
 			request -> {

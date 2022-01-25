@@ -170,7 +170,6 @@ public class ThreadPoolRequest extends CatRequestBase {
 	 * Endpoint "{@code cat.thread_pool}".
 	 */
 	public static final Endpoint<ThreadPoolRequest, ThreadPoolResponse, ErrorResponse> _ENDPOINT = new SimpleEndpoint<>(
-			"es/cat.thread_pool",
 
 			// Request method
 			request -> {

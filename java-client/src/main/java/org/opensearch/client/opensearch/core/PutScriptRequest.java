@@ -287,7 +287,6 @@ public class PutScriptRequest extends RequestBase implements JsonpSerializable {
 	 * Endpoint "{@code put_script}".
 	 */
 	public static final Endpoint<PutScriptRequest, PutScriptResponse, ErrorResponse> _ENDPOINT = new SimpleEndpoint<>(
-			"es/put_script",
 
 			// Request method
 			request -> {

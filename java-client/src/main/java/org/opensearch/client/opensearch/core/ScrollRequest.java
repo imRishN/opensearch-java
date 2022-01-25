@@ -200,7 +200,7 @@ public class ScrollRequest extends RequestBase implements JsonpSerializable {
 	/**
 	 * Endpoint "{@code scroll}".
 	 */
-	public static final SimpleEndpoint<ScrollRequest, ?> _ENDPOINT = new SimpleEndpoint<>("es/scroll",
+	public static final SimpleEndpoint<ScrollRequest, ?> _ENDPOINT = new SimpleEndpoint<>(
 
 			// Request method
 			request -> {

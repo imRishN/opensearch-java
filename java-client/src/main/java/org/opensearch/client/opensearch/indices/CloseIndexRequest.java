@@ -362,7 +362,6 @@ public class CloseIndexRequest extends RequestBase {
 	 * Endpoint "{@code indices.close}".
 	 */
 	public static final Endpoint<CloseIndexRequest, CloseIndexResponse, ErrorResponse> _ENDPOINT = new SimpleEndpoint<>(
-			"es/indices.close",
 
 			// Request method
 			request -> {

@@ -187,7 +187,6 @@ public class GetTasksRequest extends RequestBase {
 	 * Endpoint "{@code tasks.get}".
 	 */
 	public static final Endpoint<GetTasksRequest, GetTasksResponse, ErrorResponse> _ENDPOINT = new SimpleEndpoint<>(
-			"es/tasks.get",
 
 			// Request method
 			request -> {

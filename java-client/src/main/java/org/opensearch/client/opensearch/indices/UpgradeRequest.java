@@ -291,7 +291,6 @@ public class UpgradeRequest extends RequestBase {
 	 * Endpoint "{@code indices.upgrade}".
 	 */
 	public static final Endpoint<UpgradeRequest, UpgradeResponse, ErrorResponse> _ENDPOINT = new SimpleEndpoint<>(
-			"es/indices.upgrade",
 
 			// Request method
 			request -> {

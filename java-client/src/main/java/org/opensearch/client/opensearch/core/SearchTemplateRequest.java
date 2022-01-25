@@ -679,7 +679,7 @@ public class SearchTemplateRequest extends RequestBase implements JsonpSerializa
 	/**
 	 * Endpoint "{@code search_template}".
 	 */
-	public static final SimpleEndpoint<SearchTemplateRequest, ?> _ENDPOINT = new SimpleEndpoint<>("es/search_template",
+	public static final SimpleEndpoint<SearchTemplateRequest, ?> _ENDPOINT = new SimpleEndpoint<>(
 
 			// Request method
 			request -> {

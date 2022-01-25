@@ -347,7 +347,6 @@ public class CreateRepositoryRequest extends RequestBase implements JsonpSeriali
 	 * Endpoint "{@code snapshot.create_repository}".
 	 */
 	public static final Endpoint<CreateRepositoryRequest, CreateRepositoryResponse, ErrorResponse> _ENDPOINT = new SimpleEndpoint<>(
-			"es/snapshot.create_repository",
 
 			// Request method
 			request -> {

@@ -326,7 +326,6 @@ public class AddBlockRequest extends RequestBase {
 	 * Endpoint "{@code indices.add_block}".
 	 */
 	public static final Endpoint<AddBlockRequest, AddBlockResponse, ErrorResponse> _ENDPOINT = new SimpleEndpoint<>(
-			"es/indices.add_block",
 
 			// Request method
 			request -> {

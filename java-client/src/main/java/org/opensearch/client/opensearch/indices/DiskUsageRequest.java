@@ -387,7 +387,6 @@ public class DiskUsageRequest extends RequestBase {
 	 * Endpoint "{@code indices.disk_usage}".
 	 */
 	public static final Endpoint<DiskUsageRequest, DiskUsageResponse, ErrorResponse> _ENDPOINT = new SimpleEndpoint<>(
-			"es/indices.disk_usage",
 
 			// Request method
 			request -> {

@@ -33,9 +33,9 @@
 package org.opensearch.client.transport.rest_client;
 
 import org.opensearch.client.transport.TransportOptions;
-import org.opensearch.client.transport.Version;
 import org.opensearch.client.RequestOptions;
 import org.opensearch.client.WarningsHandler;
+import org.opensearch.client.transport.Version;
 
 import java.util.AbstractMap;
 import java.util.Collection;

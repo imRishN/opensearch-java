@@ -32,27 +32,16 @@
 
 package org.opensearch.client.transport;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 
 public class TransportException extends IOException {
 
-    private final String endpointId;
 
-    public TransportException(String message, String endpointId) {
-        this(message, endpointId, null);
+    public TransportException(String message) {
+        this(message, null);
     }
 
-    public TransportException(String message, String endpointId, Throwable cause) {
-        super(endpointId == null ? message : "[" + endpointId + "] " + message, cause);
-        this.endpointId = endpointId;
-    }
-
-    /**
-     * Identifier of the API endpoint that caused the exception, if known.
-     */
-    @Nullable
-    String getEndpointId() {
-        return endpointId;
+    public TransportException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

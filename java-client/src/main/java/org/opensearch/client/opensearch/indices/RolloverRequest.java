@@ -529,7 +529,6 @@ public class RolloverRequest extends RequestBase implements JsonpSerializable {
 	 * Endpoint "{@code indices.rollover}".
 	 */
 	public static final Endpoint<RolloverRequest, RolloverResponse, ErrorResponse> _ENDPOINT = new SimpleEndpoint<>(
-			"es/indices.rollover",
 
 			// Request method
 			request -> {
