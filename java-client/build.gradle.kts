@@ -104,16 +104,16 @@ val unitTest = task<Test>("unitTest") {
     }
 }
 
-//val integrationTest = task<Test>("integrationTest") {
-//    filter {
-//        includeTestsMatching("org.opensearch.client.opensearch.integTest.*")
-//    }
-//    systemProperty("tests.security.manager", "false")
-//    // Basic auth settings for integration test
-//    systemProperty("https", System.getProperty("https", "true"))
-//    systemProperty("user", System.getProperty("user", "admin"))
-//    systemProperty("password", System.getProperty("password", "admin"))
-//}
+val integrationTest = task<Test>("integrationTest") {
+    filter {
+        includeTestsMatching("org.opensearch.client.opensearch.integTest.*")
+    }
+    systemProperty("tests.security.manager", "false")
+    // Basic auth settings for integration test
+    systemProperty("https", System.getProperty("https", "true"))
+    systemProperty("user", System.getProperty("user", "admin"))
+    systemProperty("password", System.getProperty("password", "admin"))
+}
 
 dependencies {
     val opensearchVersion = "1.2.3"
